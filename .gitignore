@@ -1,0 +1,44 @@
+# Data
+data/
+data/processed/
+data/processed_grouped/
+output/
+*.zip
+*.tar.gz
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+.Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Temporary files
+JSR Submission Template.dotx
+

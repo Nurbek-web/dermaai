@@ -1,0 +1,150 @@
+% ML4H 2025 Findings Track manuscript (condensed)
+\documentclass[pmlr,twocolumn,10pt]{jmlr}
+
+% automatically loaded packages: amsmath, amssymb, natbib, graphicx, url, algorithm2e
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage[switch]{lineno}
+\sisetup{detect-weight=true,detect-family=true}
+
+% workshop title
+\jmlrworkshop{Machine Learning for Health (ML4H) 2025}
+
+% short title for header
+\title[Browser Dermoscopy Triage]{Browser-Based Dermoscopy Triage with Calibrated MobileNet}
+
+% anonymized authors for submission
+\author{\Name{Anonymous Authors}}
+
+\begin{document}
+\linenumbers
+\maketitle
+
+% -------------------------- ABSTRACT (\le 150 words) -----------------
+\begin{abstract}
+Early melanoma detection saves lives, yet rural clinics often lack dermatologists and reliable connectivity. We present a privacy-preserving, browser-based skin-lesion classifier that returns top-three diagnostic suggestions in under \SI{1}{\second} on commodity smartphones. Using a leakage-safe lesion-level split of HAM10000 (\num{10015} images, seven classes), a fine-tuned MobileNet attains \SI{97.9}{\percent} top-3 accuracy, macro-F1~\num{0.78}, and melanoma sensitivity \num{0.908} at specificity \num{0.95}. Temperature scaling reduces expected calibration error from \num{0.089} to \num{0.043} (Brier \num{0.098}), and warm inference latency ranges \SIrange{285}{920}{\milli\second}. The \SI{2.8}{MB} Brotli-compressed TensorFlow.js model runs entirely client-side, enabling rapid triage while protecting privacy.
+\end{abstract}
+
+\begin{keywords}
+skin cancer, mobile inference, calibration, privacy, dermatology
+\end{keywords}
+
+% ---------------- Mandatory statements ----------------
+\paragraph*{Data and Code Availability}
+HAM10000 images and metadata are publicly available (\url{https://doi.org/10.7910/DVN/DBW86T}). Code and trained weights will be released under an open-source licence upon acceptance; during review the anonymized code archive is provided as supplementary material.
+
+\paragraph*{Institutional Review Board (IRB)}
+The study uses fully public, de-identified data and therefore does not constitute human subjects research; IRB approval was not required.
+
+% ==========================================================
+\section{Introduction}
+Dermatologic expertise is scarce in low-resource settings, yet smartphones with capable browsers are ubiquitous. Running deep learning locally in the browser avoids network dependence and protects patient privacy. We target a clinically meaningful triage task—suggesting the three most likely diagnoses for dermatoscopic images—while meeting the reproducibility and rigor requirements of ML4H.
+
+\section{Methods (Condensed)}
+\textbf{Dataset.} HAM10000 contains \num{10015} dermatoscopic RGB images from seven lesion classes. We apply \textbf{lesion-level} stratified splitting with \texttt{GroupShuffleSplit} (seed~42): \num{9014} train, \num{1002} validation.
+
+\textbf{Model.} MobileNet-v1 pretrained on ImageNet; final 30 layers unfrozen. Head: global average pooling, dropout~0.25, softmax. Optimized with Adam (lr \SI{1e-4}{}, decay to \SI{1e-5}{}); early stopping on validation macro-F1.
+
+\textbf{Augmentation.} Rotation, shift, zoom, flip applied on-the-fly. Class weights follow sklearn’s balanced heuristic with a \num{2}\,× melanoma boost (numeric values in Appendix~\ref{apd:weights}).
+
+\textbf{Evaluation.} Metrics: categorical/top-k accuracy, macro-precision/recall/F1, ROC-AUC, PR-AUC. Bootstrap CIs with \num{1000} resamples. Calibration via temperature scaling. Latency measured with TensorFlow.js WebGL on three devices (\S\ref{sec:latency}).
+
+\section{Results}
+\subsection{Aggregate Performance}
+\begin{table}[t]
+\centering
+\caption{Summary metrics on the validation set. CIs are 95\% bootstrap.}
+\label{tab:agg}
+\small
+\begin{tabular}{lcc}
+\toprule
+Metric & Value & 95\% CI \\
+\midrule
+Top-3 accuracy & \SI{97.9}{\percent} & (96.9, 98.5) \\
+Macro-F1 & 0.78 & (0.74, 0.81) \\
+Melanoma sens @ spec 0.95 & 0.908 & (0.863, 0.947) \\
+ECE (post-cal) & 0.043 & — \\
+Brier (post-cal) & 0.098 & — \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% Training history + confusion matrix panel (keep in main text)
+\begin{figure}[htbp]
+\floatconts
+  {fig:traincm}
+  {\caption{Training/validation loss and macro-F1 across epochs; normalized confusion matrix on the validation set.}}
+  {\includegraphics[width=0.48\linewidth]{figures/training_loss_macroF1}\hfill
+   \includegraphics[width=0.48\linewidth]{figures/confusion_matrix}}
+\end{figure}
+
+\subsection{Latency Benchmarks}
+\label{sec:latency}
+Warm median inference latency spans \SIrange{285}{920}{\milli\second}; cold p95 reaches \SI{2350}{\milli\second} on a budget phone. Full table in Appendix~\ref{apd:latency}.
+
+\paragraph{Calibration and Explainability}
+Temperature scaling improved calibration (ECE from 0.089 to 0.043; Brier 0.098). Reliability diagrams and Grad-CAM examples (salient regions; AKIEC$\leftrightarrow$BKL confusions) are provided together in Appendix~C.
+
+\section{Discussion}
+Leakage-safe splitting avoids patient overlap; calibration sharpens probability estimates; on-device inference delivers sub-second responses and preserves privacy. 8-bit weight quantization could halve artifact size with negligible accuracy loss.
+
+\section{Limitations}
+HAM10000 lacks Fitzpatrick skin-type labels; actinic keratoses recall remains modest. Latency may vary with OS and browser backends.
+
+\section{Conclusion}
+A calibrated, privacy-preserving MobileNet delivers rapid dermoscopy triage entirely in the browser, meeting ML4H rigor and enabling deployment in connectivity-limited clinics.
+
+\acks{Acknowledgments will appear in the camera-ready version.}
+
+% ----------------------------------------------------
+\bibliography{references}
+
+% -------------------- Appendices --------------------
+\appendix
+
+\section{Class Weights}
+\label{apd:weights}
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccccccc}
+\toprule
+Class & akiec & bcc & bkl & df & mel & nv & vasc \\
+Weight & 4.38 & 2.78 & 1.30 & 12.45 & 2.57 & 0.21 & 10.07 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Latency Details}
+\label{apd:latency}
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lccccccc}
+\toprule
+Device & Cold~med & Cold~p95 & Warm~med & Warm~p95 & First-load & Backend & Size~(MB) \\
+ & (ms) & (ms) & (ms) & (ms) & (s) &  & raw/gz/br \\
+\midrule
+MacBook Air M2 & 920 & 1120 & 285 & 340 & 1.6 & WebGL & 12.8/3.2/2.8 \\
+iPhone 14 Pro & 1240 & 1580 & 650 & 780 & 2.1 & WebGL & 12.8/3.2/2.8 \\
+Redmi Note 9 Pro & 1890 & 2350 & 780 & 920 & 3.4 & WebGL & 12.8/3.2/2.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Calibration and Grad-CAM}
+\label{apd:cal}
+\begin{figure}[t]
+\floatconts
+  {fig:calibration_gradcam}
+  {\caption{Top: Reliability diagram before and after temperature scaling (ECE decreases from 0.089 to 0.043). Bottom: Grad-CAM panels for representative TP/TN/FP/FN cases.}}
+  {\begin{tabular}{@{}c@{}}
+     \includegraphics[width=0.95\linewidth]{figures/calibration_reliability} \\
+     \vspace{0.8ex} \\
+     \includegraphics[width=0.95\linewidth]{figures/gradcam_panels}
+   \end{tabular}}
+\end{figure}
+
+
+
+\end{document}
