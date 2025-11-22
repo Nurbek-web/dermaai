@@ -96,5 +96,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 If you use this code or methodology, please cite:
 
-> Taizhanov, N. "Derma Diagnostics: Lightweight CNN for Client‐Side Skin‐Lesion Triage in Rural Clinics." (2025).
+> Taizhanov, Nurbek. "Derma Diagnostics: Lightweight CNN for Client‐Side Skin‐Lesion Triage in Rural Clinics." (2025).
 
