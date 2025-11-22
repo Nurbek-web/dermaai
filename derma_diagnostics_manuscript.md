@@ -1,4 +1,5 @@
 ### **Derma Diagnostics: Lightweight CNN for Client‐Side Skin‐Lesion Triage in Rural Clinics**
+**By Taizhanov Nurbek**
 
 **ABSTRACT**
 Early melanoma detection saves lives, yet rural clinics often lack dermatologists and reliable connectivity. We present a privacy-preserving, browser-based skin-lesion classifier that returns top-three diagnostic predictions in under 2 seconds on standard smartphones. Using the HAM10000 dataset (10,015 dermatoscopic images, seven classes) with leakage-safe lesion-level splitting, we fine-tuned MobileNet with the final 30 layers trainable. Temperature scaling calibration reduced ECE from 0.089 to 0.043. The model achieved 97.9% top-3 accuracy, 90.8% melanoma sensitivity at 95% specificity, and cross-device inference latencies of 447ms (desktop), 1,108ms (iPhone), and 1,247ms (Android). All results include bootstrap confidence intervals and per-class ROC-AUC metrics. The TensorFlow.js model runs entirely client-side, safeguarding patient privacy while enabling rapid, accurate triage in resource-limited settings.
