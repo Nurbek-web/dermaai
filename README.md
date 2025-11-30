@@ -23,7 +23,7 @@ The model was evaluated on a held-out validation set of 159 unique lesions (1,03
 
 ### Binary Melanoma Detection (ROC Analysis)
 
-![ROC Curve](figures/melanoma_roc_curve.png)
+![ROC Curve](figures/roc_melanoma_curve.jpg)
 
 | Metric | Value |
 |:--- |:--- |
