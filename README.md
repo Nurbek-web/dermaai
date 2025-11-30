@@ -89,8 +89,8 @@ The model was evaluated on a held-out validation set of 159 unique lesions (1,03
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/yourusername/derma-diagnostics.git
-    cd derma-diagnostics
+    git clone https://github.com/Nurbek-web/dermaai.git
+    cd dermaai
     ```
 
 2.  Install Python dependencies:
